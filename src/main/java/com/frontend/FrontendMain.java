@@ -1,12 +1,11 @@
 package com.frontend;
 
 import spark.Spark;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class FrontendMain {
 
@@ -18,9 +17,9 @@ public class FrontendMain {
 
         Spark.get("/search/:topic", (req, res) -> {
             String topic = req.params(":topic");
-            return forwardRequest("http://localhost:" + CATALOG_PORT + "/search/" + topic, "GET");
+            String replace = "http://localhost:" + CATALOG_PORT + "/search/" + topic.replace(" ", "%20");
+            return forwardRequest( replace,"GET");
         });
-
 
         Spark.get("/info/:itemNumber", (req, res) -> {
             String itemNumber = req.params(":itemNumber");
@@ -33,52 +32,35 @@ public class FrontendMain {
         });
     }
 
-    public static String forwardRequest(String urlString, String method) {
 
-        urlString = urlString.replace(":topic", URLEncoder.encode(":topic", StandardCharsets.UTF_8));
 
-        StringBuilder response = new StringBuilder();
-        HttpURLConnection connection = null;
-        BufferedReader reader = null;
+
+    private static String forwardRequest(String url, String method) {
         try {
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(method);
+            // Debugging: Print the URL before making the request
+            System.out.println("Forwarding request to URL: " + url);
 
-            if (method.equalsIgnoreCase("POST")) {
-                connection.setDoOutput(true);
-                connection.setRequestProperty("Content-Type", "application/json");
-                OutputStream os = connection.getOutputStream();
-                os.write("".getBytes()); // Empty payload for POST request
-                os.flush();
-                os.close();
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                    .uri(new URI(url))
+                    .method(method, HttpRequest.BodyPublishers.noBody());
+
+            if (method.equals("POST")) {
+                requestBuilder.header("Content-Type", "application/json"); // Adjust content type if needed
             }
 
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
+            HttpRequest request = requestBuilder.build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == HttpURLConnection.HTTP_OK) {
+                return response.body();
             } else {
-                response.append("HTTP response code: ").append(responseCode);
+                return "Error forwarding request: " + response.statusCode() + " " + response.body();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
+        } catch (Exception e) {
+            return "Error forwarding request: " + e.getMessage();
         }
-        return response.toString();
     }
+
+
 }

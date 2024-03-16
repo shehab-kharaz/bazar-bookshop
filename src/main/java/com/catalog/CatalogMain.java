@@ -30,6 +30,7 @@ public class CatalogMain {
     }
 
     private static String searchBooksByTopic(String topic) {
+
         JSONArray jsonArray = new JSONArray();
         try (BufferedReader reader = new BufferedReader(new FileReader(CATALOG_FILE_PATH))) {
             jsonArray = new JSONArray(reader.lines()
