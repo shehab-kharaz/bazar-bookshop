@@ -19,9 +19,13 @@ public class CatalogMain {
 
         Spark.get("/search/:topic", (req, res) -> {
             String topic = req.params(":topic");
-            return searchBooksByTopic(topic);
+            return searchBooks(topic, 2);
         });
 
+        Spark.get("/searchItem/:itemName", (req, res) -> {
+            String itemName = req.params(":itemName");
+            return searchBooks(itemName, 1);
+        });
 
         Spark.get("/info/:itemNumber", (req, res) -> {
             int itemNumber = Integer.parseInt(req.params(":itemNumber"));
@@ -29,13 +33,13 @@ public class CatalogMain {
         });
     }
 
-    private static String searchBooksByTopic(String topic) {
+    private static String searchBooks(String topic, int part) {
 
         JSONArray jsonArray = new JSONArray();
         try (BufferedReader reader = new BufferedReader(new FileReader(CATALOG_FILE_PATH))) {
             jsonArray = new JSONArray(reader.lines()
                     .map(line -> line.split(","))
-                    .filter(parts -> parts.length >= 3 && parts[2].trim().equalsIgnoreCase(topic))
+                    .filter(parts -> parts.length >= 3 && parts[part].trim().equalsIgnoreCase(topic))
                     .map(parts -> new JSONObject().put("id", Integer.parseInt(parts[0].trim())).put("title", parts[1].trim()))
                     .collect(Collectors.toList()));
         } catch (IOException e) {
@@ -43,6 +47,8 @@ public class CatalogMain {
         }
         return jsonArray.toString();
     }
+
+
 
     private static String getBookInfo(int itemNumber) {
         JSONObject response = new JSONObject();
