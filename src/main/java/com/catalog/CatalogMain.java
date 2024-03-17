@@ -6,12 +6,18 @@ import spark.Spark;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class CatalogMain {
 
     private static final String CATALOG_FILE_PATH = "src/main/resources/catalog.txt";
+    private static final Path path = Paths.get(CATALOG_FILE_PATH);
+
 
     public static void main(String[] args) {
 
@@ -31,6 +37,24 @@ public class CatalogMain {
             int itemNumber = Integer.parseInt(req.params(":itemNumber"));
             return getBookInfo(itemNumber);
         });
+
+        Spark.post("/update/cost/:itemNumber/:newCost", (req, res) -> {
+            int itemNumber = Integer.parseInt(req.params(":itemNumber"));
+            double newCost = Double.parseDouble(req.params(":newCost"));
+            return updateCost(itemNumber, newCost);
+        });
+
+        Spark.post("/update/increaseStock/:itemNumber/:amount", (req, res) -> {
+            int itemNumber = Integer.parseInt(req.params(":itemNumber"));
+            int increaseAmount = Integer.parseInt(req.params(":amount"));
+            return increaseStock(itemNumber, increaseAmount);
+        });
+
+        Spark.post("/update/decreaseStock/:itemNumber/:amount", (req, res) -> {
+            int itemNumber = Integer.parseInt(req.params(":itemNumber"));
+            int decreaseAmount = Integer.parseInt(req.params(":amount"));
+            return decreaseStock(itemNumber, decreaseAmount);
+        });
     }
 
     private static String searchBooks(String topic, int part) {
@@ -47,8 +71,6 @@ public class CatalogMain {
         }
         return jsonArray.toString();
     }
-
-
 
     private static String getBookInfo(int itemNumber) {
         JSONObject response = new JSONObject();
@@ -68,4 +90,67 @@ public class CatalogMain {
         }
         return response.toString();
     }
+
+    private static String updateCost(int itemNumber, double newCost) {
+        try {
+            List<String> lines = Files.readAllLines(path);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && Integer.parseInt(parts[0].trim()) == itemNumber) {
+                    parts[4] = String.valueOf(newCost);
+                    lines.set(i, String.join(",", parts));
+                    break;
+                }
+            }
+            Files.write(path, lines);
+            return "Cost for item " + itemNumber + " updated to " + newCost + " successfully.\n";
+        } catch (Exception e) {
+            return "Error updating cost for item " + itemNumber + ": " + e.getMessage() + "\n";
+        }
+    }
+
+    private static String increaseStock(int itemNumber, int increaseAmount) {
+        try {
+            List<String> lines = Files.readAllLines(path);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && Integer.parseInt(parts[0].trim()) == itemNumber) {
+                    int currentStock = Integer.parseInt(parts[3].trim());
+                    parts[3] = String.valueOf(currentStock + increaseAmount);
+                    lines.set(i, String.join(",", parts));
+                    break;
+                }
+            }
+            Files.write(Paths.get(CATALOG_FILE_PATH), lines);
+            return "Stock for item " + itemNumber + " increased by " + increaseAmount + " units successfully.\n";
+        } catch (Exception e) {
+            return "Error increasing stock for item " + itemNumber + ": " + e.getMessage() + "\n";
+        }
+    }
+
+    private static String decreaseStock(int itemNumber, int decreaseAmount) {
+        try {
+            List<String> lines = Files.readAllLines(path);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && Integer.parseInt(parts[0].trim()) == itemNumber) {
+                    int currentStock = Integer.parseInt(parts[3].trim());
+                    if (currentStock < decreaseAmount) {
+                        return "Error: Insufficient stock for item " + itemNumber + ".";
+                    }
+                    parts[3] = String.valueOf(currentStock - decreaseAmount);
+                    lines.set(i, String.join(",", parts));
+                    break;
+                }
+            }
+            Files.write(Paths.get(CATALOG_FILE_PATH), lines);
+            return "Stock for item " + itemNumber + " decreased by " + decreaseAmount + " units successfully.\n";
+        } catch (Exception e) {
+            return "Error decreasing stock for item " + itemNumber + ": " + e.getMessage() + "\n";
+        }
+    }
+
 }
