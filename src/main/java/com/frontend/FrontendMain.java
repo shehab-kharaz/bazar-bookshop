@@ -35,6 +35,25 @@ public class FrontendMain {
             String itemNumber = req.params(":itemNumber");
             return forwardRequest("http://localhost:" + ORDER_PORT + "/purchase/" + itemNumber, "POST");
         });
+
+
+        Spark.post("/updateCost/:itemNumber/:newCost", (req, res) -> {
+            String itemNumber = req.params(":itemNumber");
+            String newCost = req.params(":newCost");
+            return forwardRequest("http://localhost:" + CATALOG_PORT + "/update/cost/" + itemNumber + "/" + newCost, "POST");
+        });
+
+        Spark.post("/increaseStock/:itemNumber/:amount", (req, res) -> {
+            String itemNumber = req.params(":itemNumber");
+            String amount = req.params(":amount");
+            return forwardRequest("http://localhost:" + CATALOG_PORT + "/update/increaseStock/" + itemNumber + "/" + amount, "POST");
+        });
+
+        Spark.post("/decreaseStock/:itemNumber/:amount", (req, res) -> {
+            String itemNumber = req.params(":itemNumber");
+            String amount = req.params(":amount");
+            return forwardRequest("http://localhost:" + CATALOG_PORT + "/update/decreaseStock/" + itemNumber + "/" + amount, "POST");
+        });
     }
 
 
@@ -66,6 +85,5 @@ public class FrontendMain {
             return "Error forwarding request: " + e.getMessage();
         }
     }
-
 
 }
