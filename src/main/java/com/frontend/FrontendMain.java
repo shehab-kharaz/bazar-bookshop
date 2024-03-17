@@ -21,6 +21,11 @@ public class FrontendMain {
             return forwardRequest( replace,"GET");
         });
 
+        Spark.get("/searchItem/:itemName", (req, res) -> {
+            String itemName = req.params(":itemName");
+            return forwardRequest("http://localhost:" + CATALOG_PORT + "/searchItem/" + itemName.replace(" ", "%20"), "GET");
+        });
+
         Spark.get("/info/:itemNumber", (req, res) -> {
             String itemNumber = req.params(":itemNumber");
             return forwardRequest("http://localhost:" + CATALOG_PORT + "/info/" + itemNumber, "GET");
