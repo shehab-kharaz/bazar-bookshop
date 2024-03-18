@@ -21,8 +21,8 @@ public class CatalogMain {
 
     public static void main(String[] args) {
 
+        //Define the port to listen on it, defile routes and calling the actual functionalities
         Spark.port(4567);
-
         Spark.get("/search/:topic", (req, res) -> {
             String topic = req.params(":topic");
             return searchBooks(topic, 2);
@@ -57,6 +57,10 @@ public class CatalogMain {
         });
     }
 
+    //Using BufferReader to read the data file and get the needed data
+    //topic argument can be the topic or the book name, since the two is the same functionality but difference just
+    //in the thing we search based on it, so the part argument will specify if we search based on the
+    //topic or the book name
     private static String searchBooks(String topic, int part) {
 
         JSONArray jsonArray = new JSONArray();

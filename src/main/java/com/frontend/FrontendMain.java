@@ -13,8 +13,10 @@ public class FrontendMain {
     private static final int ORDER_PORT = 4568;
 
     public static void main(String[] args) {
+        //The port that the Frontend service will listen on it
         Spark.port(4569);
 
+        //Define the endpoints and create the request that will be forwarded for catalog/order
         Spark.get("/search/:topic", (req, res) -> {
             String topic = req.params(":topic");
             String replace = "http://localhost:" + CATALOG_PORT + "/search/" + topic.replace(" ", "%20");
@@ -59,23 +61,26 @@ public class FrontendMain {
 
 
 
+    //Forwarding requests over HTTP using HttpClient to the desired services (order, catalog)
     private static String forwardRequest(String url, String method) {
         try {
-            // Debugging: Print the URL before making the request
-            System.out.println("Forwarding request to URL: " + url);
 
             HttpClient httpClient = HttpClient.newHttpClient();
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(new URI(url))
                     .method(method, HttpRequest.BodyPublishers.noBody());
 
+            //since POST, so we need to change a resource and this to make the service expect JSON
+            //I used POST rather than PUT for update/purchase
+            //PATCH would be the most appropriate verb
             if (method.equals("POST")) {
-                requestBuilder.header("Content-Type", "application/json"); // Adjust content type if needed
+                requestBuilder.header("Content-Type", "application/json");
             }
 
             HttpRequest request = requestBuilder.build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+            //return the response if status code = 200 and return error otherwise
             if (response.statusCode() == HttpURLConnection.HTTP_OK) {
                 return response.body();
             } else {
