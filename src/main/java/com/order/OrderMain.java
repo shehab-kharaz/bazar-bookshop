@@ -12,14 +12,17 @@ public class OrderMain {
     private static final String CATALOG_FILE_PATH = "src/main/resources/catalog.txt";
 
     public static void main(String[] args) {
+        //specify the port to listen on it, define the endpoint and calling the actual functionality
         Spark.port(4568);
-
         Spark.post("/purchase/:itemNumber", (req, res) -> {
             int itemNumber = Integer.parseInt(req.params(":itemNumber"));
             return purchaseBook(itemNumber);
         });
     }
 
+
+    //Using File class to read the file and check if the stock empty or not
+    //If it is not, and the book exists, purchase the book and decrease the stock
     private static String purchaseBook(int itemNumber) {
         try {
             Path catalogPath = Paths.get(CATALOG_FILE_PATH);
