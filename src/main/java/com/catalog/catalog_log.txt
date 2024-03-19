@@ -1,0 +1,18 @@
+Time: 2024-03-19T02:38:12.995893, Source IP: 127.0.0.1, Endpoint: /search/distributed systems, Status Code: 200
+Time: 2024-03-19T02:38:38.114500, Source IP: 127.0.0.1, Endpoint: /checkStock/1, Status Code: 200
+Time: 2024-03-19T02:38:38.202313, Source IP: 127.0.0.1, Endpoint: /update/decreaseStock/1/1, Status Code: 200
+Time: 2024-03-19T02:55:09.367058, Source IP: 127.0.0.1, Endpoint: /search/distributed systems, Status Code: 200
+Time: 2024-03-19T02:55:23.301552, Source IP: 127.0.0.1, Endpoint: /search/distributed systems, Status Code: 200
+Time: 2024-03-19T02:55:33.854351, Source IP: 127.0.0.1, Endpoint: /info/1, Status Code: 200
+Time: 2024-03-19T02:55:37.992334, Source IP: 127.0.0.1, Endpoint: /info/1, Status Code: 200
+Time: 2024-03-19T02:55:49.056961, Source IP: 127.0.0.1, Endpoint: /info/1, Status Code: 200
+Time: 2024-03-19T02:55:54.840339, Source IP: 127.0.0.1, Endpoint: /info/1, Status Code: 200
+Time: 2024-03-19T02:56:01.857132, Source IP: 127.0.0.1, Endpoint: /checkStock/1, Status Code: 200
+Time: 2024-03-19T02:56:01.940313, Source IP: 127.0.0.1, Endpoint: /update/decreaseStock/1/1, Status Code: 200
+Time: 2024-03-19T02:56:10.623435, Source IP: 127.0.0.1, Endpoint: /update/cost/1/50.50, Status Code: 200
+Time: 2024-03-19T02:56:17.513547, Source IP: 127.0.0.1, Endpoint: /update/increaseStock/1/5, Status Code: 200
+Time: 2024-03-19T02:56:28.294235, Source IP: 127.0.0.1, Endpoint: /update/decreaseStock/1/5, Status Code: 200
+Time: 2024-03-19T02:58:26.027518, Source IP: 127.0.0.1, Endpoint: /update/decreaseStock/1/5, Status Code: 200
+Time: 2024-03-19T02:58:36.822053, Source IP: 127.0.0.1, Endpoint: /update/increaseStock/1/5, Status Code: 200
+Time: 2024-03-19T02:58:52.699978, Source IP: 127.0.0.1, Endpoint: /checkStock/1, Status Code: 200
+Time: 2024-03-19T02:58:52.751293, Source IP: 127.0.0.1, Endpoint: /update/decreaseStock/1/1, Status Code: 200

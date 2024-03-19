@@ -82,12 +82,12 @@ public class FrontendMain {
 
             //return the response if status code = 200 and return error otherwise
             if (response.statusCode() == HttpURLConnection.HTTP_OK) {
-                return response.body();
+                return response.body() + "\n";
             } else {
-                return "Error forwarding request: " + response.statusCode() + " " + response.body();
+                return "Error forwarding request: " + response.statusCode() + " " + response.body() + "\n";
             }
         } catch (Exception e) {
-            return "Error forwarding request: " + e.getMessage();
+            return "Error forwarding request: " + e.getMessage() + "\n";
         }
     }
 
