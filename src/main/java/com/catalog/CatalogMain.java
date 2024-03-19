@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 public class CatalogMain {
 
     private static final String CATALOG_FILE_PATH = "src/main/resources/catalog.txt";
+    private static final Path CATALOG_LOG_FILE = Paths.get("src/main/java/com/catalog/catalog_log.txt");
     private static final Path path = Paths.get(CATALOG_FILE_PATH);
 
 
@@ -55,12 +58,32 @@ public class CatalogMain {
             int decreaseAmount = Integer.parseInt(req.params(":amount"));
             return decreaseStock(itemNumber, decreaseAmount);
         });
+
+        Spark.get("/checkStock/:itemNumber", (req, res) -> {
+            int itemNumber = Integer.parseInt(req.params(":itemNumber"));
+            return checkStock(itemNumber);
+        });
+
+        Spark.after((req, res) -> logRequest(req, res.status()));
+    }
+
+
+
+    private static void logRequest(spark.Request req, int statusCode) {
+        try {
+            String logEntry = String.format("Time: %s, Source IP: %s, Endpoint: %s, Status Code: %d%n",
+                    LocalDateTime.now(), req.ip(), req.pathInfo(), statusCode);
+            Files.write(CATALOG_LOG_FILE, logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.err.println("Error logging request: " + e.getMessage());
+        }
     }
 
     //Using BufferReader to read the data file and get the needed data
     //topic argument can be the topic or the book name, since the two is the same functionality but difference just
     //in the thing we search based on it, so the part argument will specify if we search based on the
-    //topic or the book name
+    //topic or the book name (named part because it is used as array part/index,
+    //where the array maintains the information for the current book
     private static String searchBooks(String topic, int part) {
 
         JSONArray jsonArray = new JSONArray();
@@ -73,7 +96,7 @@ public class CatalogMain {
         } catch (IOException e) {
             System.out.println("Exception from searchBooksByTopic in catalog service");
         }
-        return jsonArray.toString();
+        return jsonArray + "\n";
     }
 
     private static String getBookInfo(int itemNumber) {
@@ -92,7 +115,7 @@ public class CatalogMain {
         } catch (IOException | NumberFormatException e) {
             System.err.println("Error reading catalog file: " + e.getMessage());
         }
-        return response.toString();
+        return response + "\n";
     }
 
     private static String updateCost(int itemNumber, double newCost) {
@@ -157,4 +180,24 @@ public class CatalogMain {
         }
     }
 
+    private static String checkStock(int itemNumber) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(CATALOG_FILE_PATH))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                int itemId = Integer.parseInt(parts[0].trim());
+                int stock = Integer.parseInt(parts[3].trim());
+                if (itemId == itemNumber) {
+                    if (stock > 0) {
+                        return "available";
+                    } else {
+                        return "out of stock";
+                    }
+                }
+            }
+            return "Item not found";
+        } catch (IOException | NumberFormatException e) {
+            return "Error checking stock: " + e.getMessage();
+        }
+    }
 }
